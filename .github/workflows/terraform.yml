@@ -1,0 +1,25 @@
+name: 'Terraform Automation'
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  ARM_CLIENT_ID: ${{ secrets.AZ_CLIENT_ID }}
+  ARM_CLIENT_SECRET: ${{ secrets.AZ_CLIENT_SECRET }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZ_TENANT_ID }}
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Run
+        run: |
+          terraform init
+          terraform plan

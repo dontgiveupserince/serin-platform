@@ -7,7 +7,7 @@ terraform {
   }
   backend "azurerm" {
     resource_group_name  = "serin-tfstate-rg"
-    storage_account_name = "serintfstate1776927377"
+    storage_account_name = "serinst5640"
     container_name       = "tfstate"
     key                  = "terraform.tfstate"
   }
