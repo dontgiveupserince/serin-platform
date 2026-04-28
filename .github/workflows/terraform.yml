@@ -1,7 +1,7 @@
 name: 'Terraform Automation'
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "feat/automation" ]
 
 env:
   ARM_CLIENT_ID: ${{ secrets.AZ_CLIENT_ID }}
