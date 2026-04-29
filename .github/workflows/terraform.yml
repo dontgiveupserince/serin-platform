@@ -23,3 +23,22 @@ jobs:
         run: |
           terraform init
           terraform plan
+
+build-image:
+    needs: terraform # Only build if TF infrastructure is confirmed
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Azure Container Registry Login
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ secrets.ACR_LOGIN_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Build and Push Image
+        run: |
+          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/audit-bot:v1 .
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/audit-bot:v1
