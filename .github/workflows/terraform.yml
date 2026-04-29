@@ -1,7 +1,8 @@
 name: 'Terraform Automation'
 on:
   push:
-    branches: [ "feat/automation" ]
+    # Use a wildcard so any feature branch triggers the check
+    branches: [ "main", "feat/*" ]
 
 env:
   ARM_CLIENT_ID: ${{ secrets.AZ_CLIENT_ID }}
@@ -25,7 +26,7 @@ jobs:
           terraform plan
 
   build-image:
-    needs: terraform # Only build if TF infrastructure is confirmed
+    needs: terraform
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
