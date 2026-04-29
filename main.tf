@@ -141,3 +141,23 @@ resource "azurerm_network_interface_security_group_association" "example" {
   network_interface_id      = azurerm_network_interface.vm_nic.id
   network_security_group_id = azurerm_network_security_group.vm_nsg.id
 }
+
+# Create the Azure Container Registry
+resource "azurerm_container_registry" "acr" {
+  name                = "serinregistry${random_string.suffix.result}" 
+  resource_group_name = azurerm_resource_group.network_rg.name
+  location            = azurerm_resource_group.network_rg.location
+  sku                 = "Basic"
+  admin_enabled       = true # Allows us to use a username/password for login
+}
+
+# Generates a random suffix because ACR names must be unique across all of Azure
+resource "random_string" "suffix" {
+  length  = 6
+  special = false
+  upper   = false
+}
+
+output "acr_login_server" {
+  value = azurerm_container_registry.acr.login_server
+}
