@@ -161,3 +161,31 @@ resource "random_string" "suffix" {
 output "acr_login_server" {
   value = azurerm_container_registry.acr.login_server
 }
+
+# Create the AKS Cluster
+resource "azurerm_kubernetes_cluster" "aks" {
+  name                = "serin-aks-cluster"
+  location            = azurerm_resource_group.network_rg.location
+  resource_group_name = azurerm_resource_group.network_rg.name
+  dns_prefix          = "serinaks"
+
+  default_node_pool {
+    name       = "default"
+    node_count = 1
+    vm_size    = "Standard_D2s_v3" # Small and cost-effective for learning
+  }
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  tags = {
+    Environment = "Dev"
+  }
+}
+
+# Output the Kubeconfig (You'll need this to talk to the cluster)
+output "kube_config" {
+  value     = azurerm_kubernetes_cluster.aks.kube_config_raw
+  sensitive = true
+}
