@@ -69,7 +69,7 @@ resource "azurerm_linux_virtual_machine" "main_vm" {
   location            = azurerm_resource_group.network_rg.location
   size                = "Standard_D2s_v3"
   admin_username      = "serinadmin"
-  
+
   network_interface_ids = [
     azurerm_network_interface.vm_nic.id,
   ]
@@ -144,7 +144,7 @@ resource "azurerm_network_interface_security_group_association" "example" {
 
 # Create the Azure Container Registry
 resource "azurerm_container_registry" "acr" {
-  name                = "serinregistry${random_string.suffix.result}" 
+  name                = "serinregistry${random_string.suffix.result}"
   resource_group_name = azurerm_resource_group.network_rg.name
   location            = azurerm_resource_group.network_rg.location
   sku                 = "Basic"
