@@ -69,14 +69,14 @@ resource "azurerm_linux_virtual_machine" "main_vm" {
   location            = azurerm_resource_group.network_rg.location
   size                = "Standard_D2s_v3"
   admin_username      = "serinadmin"
-  
+
   network_interface_ids = [
     azurerm_network_interface.vm_nic.id,
   ]
 
   admin_ssh_key {
     username   = "serinadmin"
-    public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCZMa5coMinzVcDtvw4H1OHdbS548zc6Tal3f3bEzmLo0TZFflHhiGjqM9NAF81L9bGCPqyWsWBqBXBUbM2TQeLqF75pp2pXWF76/xUINXVi+DN8KGYI8Wn9OoK2K3FjrFZb000A2Ebw75LF4kF3Hx/PJijq+6g1yslw7LDhOKrE9tnF65Mm91EmxxIInsJnqgw5ssrty35L8htT+6i2QAgK7symiiNQC7ssOEQL2xFSv2/eVyJi3bP8q4FeG9H32/TsBSKa47/w+zmSDtASCGRNF9rCalCwd30VA+DNe+hzw1qUV/cAUpD6MziAWD4z1ScYIK37cNllmKb53X/ihKd44mKmWGhSR7yR+DLgmmdVxQHE3Q4e5hMB4m/zUFgrDmMQexlP8deS1INVjL+NOHYdWxGnfnP+1UoLWziWdDPSPFgnnyDSa6IpeVX4/rbENNbBD0k0UILvN6QiyujEi9jrS1hq9lUpHRejNGDAzA1fYRvP4Rg7vf9CZ/Ciz7gf3oX7q34JS9vCl0/rGiEkyajOBzUmO4LkHyw7j2hBwVol/OuBEyIi6+6LgK735gy86Uh+w4fjsJEsDe1Q6iynZ+b6ETsyKG0LLx228cRYyeciR1AHZBjFE+nIfSZrVUmOt/WhOAeOQZwnxBSitou829wrD9D+KI6mBbKcvVoCg5m+Q== serin@serinsfamily"
+    public_key = var.admin_ssh_public_key
   }
 
   os_disk {
@@ -119,7 +119,7 @@ resource "azurerm_network_security_group" "vm_nsg" {
     protocol                   = "Tcp"
     source_port_range          = "*"
     destination_port_range     = "22"
-    source_address_prefix      = "*" # In production, we'd limit this to your Schofields IP
+    source_address_prefix      = var.allowed_ssh_cidr # In production, we'd limit this to your private IP
     destination_address_prefix = "*"
   }
 
@@ -144,7 +144,7 @@ resource "azurerm_network_interface_security_group_association" "example" {
 
 # Create the Azure Container Registry
 resource "azurerm_container_registry" "acr" {
-  name                = "serinregistry${random_string.suffix.result}" 
+  name                = "serinregistry${random_string.suffix.result}"
   resource_group_name = azurerm_resource_group.network_rg.name
   location            = azurerm_resource_group.network_rg.location
   sku                 = "Basic"
@@ -188,4 +188,11 @@ resource "azurerm_kubernetes_cluster" "aks" {
 output "kube_config" {
   value     = azurerm_kubernetes_cluster.aks.kube_config_raw
   sensitive = true
+}
+
+resource "azurerm_role_assignment" "aks_acr_pull" {
+  principal_id                     = azurerm_kubernetes_cluster.aks.kubelet_identity[0].object_id
+  role_definition_name             = "AcrPull"
+  scope                            = azurerm_container_registry.acr.id
+  skip_service_principal_aad_check = true
 }
