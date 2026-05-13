@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: audit-bot
-        image: serinregistryxr58p9.azurecr.io/audit-bot:v1-fixed
+        image: serinregistryxr58p9.azurecr.io/audit-bot:stress-test-v4
         resources:
           requests:
             cpu: "100m"
