@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: audit-bot
-        image: serinregistryxr58p9.azurecr.io/audit-bot:stress-test-v4
+        image: serinregistryxr58p9.azurecr.io/audit-bot:probes-broken
         resources:
           requests:
             cpu: "100m"
@@ -22,3 +22,39 @@ spec:
           limits:
             cpu: "250m"
             memory: "256Mi"
+
+        startupProbe:
+          exec:
+            command:
+            - cat
+            - /tmp/heartbeat
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          failureThreshold: 6
+          timeoutSeconds: 3
+        # failureThreshold × periodSeconds = 30s max startup window
+        # If heartbeat file not written within 30s — container restart
+
+        readinessProbe:
+          exec:
+            command:
+            - cat
+            - /tmp/heartbeat
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3
+          timeoutSeconds: 3
+        # Pod pulled from endpoints if file missing for 30s
+
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - "test $(( $(date +%s) - $(stat -c %Y /tmp/heartbeat) )) -lt 30"
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          failureThreshold: 1
+          timeoutSeconds: 3
+        # Container restarted if file missing for 30s
+        # initialDelaySeconds > startupProbe window — liveness won't fire during startup
