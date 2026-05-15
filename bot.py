@@ -1,17 +1,19 @@
 import time
+import os
 
-print("Serin Platform Audit Bot starting - memory stress test")
+print("Audit Bot starting", flush=True)
 
-memory_hog = []
-chunk_size = 10 * 1024 * 1024  # 10MB per chunk
+HEARTBEAT_FILE = "/tmp/heartbeat"
+start_time = time.time()
 
 while True:
-    current_mb = len(memory_hog) * 10
-    
-    if current_mb < 180:
-        memory_hog.append("x" * chunk_size)
-        print(f"Memory allocated: {current_mb}MB - still growing")
+    elapsed = time.time() - start_time
+
+    if elapsed < 30:
+        with open(HEARTBEAT_FILE, "w") as f:
+            f.write(str(time.time()))
+        print(f"Heartbeat written at {elapsed:.0f}s", flush=True)
     else:
-        print(f"Memory holding at ~{current_mb}MB - alert should fire")
-    
+        print(f"Heartbeat STOPPED at {elapsed:.0f}s - simulating hang", flush=True)
+
     time.sleep(2)
