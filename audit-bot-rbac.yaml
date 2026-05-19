@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: audit-bot-deployment
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: audit-bot
+  template:
+    metadata:
+      labels:
+        app: audit-bot
+    spec:
+      # --- what goes here? ---
+      serviceAccountName: audit-bot-sa
+      containers:
+      - name: audit-bot
+        image: serinacr.azurecr.io/audit-bot:latest
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
