@@ -1,0 +1,41 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: web-server-deny-all-ingress
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: web-server
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          run: curl-test
+      namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: default
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: web-server-egress-deny-allow-dns
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: web-server
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
